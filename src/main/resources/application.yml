@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: intelligent-tutoring-service-platform-server
+  # 配置文件环境
+  profiles:
+    active: '@profile.active@'
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+# 设置日志级别
+logging:
+  level:
+    org.springframework.web: info
+# 启动端口
+server:
+  port: 8080

@@ -1,0 +1,8 @@
+# dev 环境
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    name: defaultDataSource
+    url: jdbc:mysql://localhost:3306/intelligent-tutoring-service-platform-server?serverTimezone=UTC
+    username: root
+    password: admin1234
