@@ -6,6 +6,3 @@ spring:
     url: jdbc:mysql://gongsir.club:3306/intelligent-tutoring-service-platform-server?serverTimezone=UTC
     username: root
     password: admin1234
-
-server:
-  port: 8080

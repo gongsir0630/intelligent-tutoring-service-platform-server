@@ -2,17 +2,29 @@ package com.intelligent.platform.server.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.ImmutableMap;
+import com.intelligent.platform.server.enums.IntelligentTutoringGradeEnum;
+import com.intelligent.platform.server.enums.IntelligentTutoringSubjectEnum;
 import com.intelligent.platform.server.model.IntelligentTutoringUser;
+import com.intelligent.platform.server.param.IntelligentTutoringUserParam;
 import com.intelligent.platform.server.service.IntelligentTutoringUserService;
+import com.intelligent.platform.server.vo.IntelligentTutoringGradeVO;
+import com.intelligent.platform.server.vo.IntelligentTutoringSubjectVO;
+import com.intelligent.platform.server.vo.IntelligentTutoringUserVO;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author 何双宝 <2936741978@qq.com>
@@ -67,7 +79,7 @@ public class IntelligentTutoringUserController {
     @GetMapping("/info")
     public Map<String, Object> getUserInfo(String token) {
         logger.info("getUserInfo, token===>{}", token);
-        IntelligentTutoringUser user = intelligentTutoringUserService.getById(token);
+        IntelligentTutoringUserVO user = intelligentTutoringUserService.queryByUsername(token);
 
         if (Objects.isNull(user)) {
             return ImmutableMap.of(
@@ -75,9 +87,6 @@ public class IntelligentTutoringUserController {
                     "message", "Login failed, unable to get user details."
             );
         }
-
-        // 将 role >> roles : admin >> ['admin']
-        user.setRoles(Collections.singletonList(user.getRole()));
 
         return ImmutableMap.of(
                 "code", 20000,
@@ -94,13 +103,13 @@ public class IntelligentTutoringUserController {
     }
 
     @PostMapping("/register")
-    public Map<String, Object> register(@RequestBody IntelligentTutoringUser user) {
-        logger.info("register, 用户提交注册信息, user===>{}", JSON.toJSONString(user));
+    public Map<String, Object> register(@RequestBody IntelligentTutoringUserParam param) {
+        logger.info("register, 用户提交注册信息, param===>{}", JSON.toJSONString(param));
 
-        IntelligentTutoringUser tutoringUser = intelligentTutoringUserService.getById(user.getUsername());
+        IntelligentTutoringUser tutoringUser = intelligentTutoringUserService.getById(param.getUsername());
         if (Objects.isNull(tutoringUser)) {
-            boolean save = intelligentTutoringUserService.save(user);
-            tutoringUser = intelligentTutoringUserService.getById(user.getUsername());
+            boolean save = intelligentTutoringUserService.save(param.buildUser());
+            tutoringUser = intelligentTutoringUserService.getById(param.getUsername());
             logger.info("注册用户信息, save===>{}", save);
         }
         return ImmutableMap.of(
@@ -109,4 +118,56 @@ public class IntelligentTutoringUserController {
         );
     }
 
+    @PostMapping("/list")
+    public Map<String, Object> getUserList(@RequestBody String param) {
+        logger.info("getUserList, 查询用户信息列表, param===>{}", JSON.toJSONString(param));
+
+        List<IntelligentTutoringUserVO> userList = intelligentTutoringUserService.listAll();
+        return ImmutableMap.of(
+                "code", 20000,
+                "data", userList
+        );
+    }
+
+    @GetMapping("/grade")
+    public Map<String, Object> getGradeList() {
+        // 流式处理
+        List<IntelligentTutoringGradeVO> gradeList = Arrays.stream(IntelligentTutoringGradeEnum.values()).map(k -> IntelligentTutoringGradeVO
+                .builder().value(k.getCode()).label(k.getDesc()).build()).filter(k -> StringUtils.isNotBlank(k.getLabel())).collect(Collectors.toList());
+        return ImmutableMap.of(
+                "code", 20000,
+                "data", gradeList
+        );
+    }
+
+    @GetMapping("/subject")
+    public Map<String, Object> getSubjectList() {
+        // 流式处理
+        List<IntelligentTutoringSubjectVO> subjectList = Arrays.stream(IntelligentTutoringSubjectEnum.values()).map(k -> IntelligentTutoringSubjectVO
+                .builder().value(k.getCode()).label(k.getDesc()).build()).filter(k -> StringUtils.isNotBlank(k.getLabel())).collect(Collectors.toList());
+        return ImmutableMap.of(
+                "code", 20000,
+                "data", subjectList
+        );
+    }
+
+    @PostMapping("/update")
+    public Map<String, Object> update(@RequestBody IntelligentTutoringUserParam param) {
+        logger.info("update, param===>{}", JSON.toJSONString(param));
+        intelligentTutoringUserService.updateById(param.buildUser());
+        return ImmutableMap.of(
+                "code", 20000,
+                "data", "success"
+        );
+    }
+
+    @PostMapping("/delete")
+    public Map<String, Object> deleteUser(@RequestBody IntelligentTutoringUserParam param) {
+        logger.info("deleteUser, param===>{}", JSON.toJSONString(param));
+        intelligentTutoringUserService.removeById(param.getUsername());
+        return ImmutableMap.of(
+                "code", 20000,
+                "data", "success"
+        );
+    }
 }
