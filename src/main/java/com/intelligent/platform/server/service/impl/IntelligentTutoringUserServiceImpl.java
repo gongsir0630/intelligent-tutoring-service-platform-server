@@ -56,6 +56,7 @@ public class IntelligentTutoringUserServiceImpl extends ServiceImpl<IntelligentT
         vo.setAvatar(user.getAvatar());
         vo.setIntroduction(user.getIntroduction());
         vo.setPhone(user.getPhone());
+        vo.setMail(user.getMail());
         vo.setRole(user.getRole());
         vo.setRoles(Collections.singletonList(user.getRole()));
         vo.setBirthday(IntelligentTutoringDateUtil.longToStr(user.getBirthday()));

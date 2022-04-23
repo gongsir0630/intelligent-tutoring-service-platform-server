@@ -19,6 +19,7 @@ public class IntelligentTutoringUserParam {
     private String introduction;
     private String role;
     private String phone;
+    private String mail;
     private String birthday;
 
     // 学生信息
@@ -42,6 +43,7 @@ public class IntelligentTutoringUserParam {
                 .name(this.name)
                 .password(this.password)
                 .phone(this.phone)
+                .mail(this.mail)
                 .role(this.role)
                 // 学生
                 .school(this.school)

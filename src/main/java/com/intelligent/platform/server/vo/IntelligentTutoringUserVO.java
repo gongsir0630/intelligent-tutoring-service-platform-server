@@ -54,6 +54,11 @@ public class IntelligentTutoringUserVO {
     private String phone;
 
     /**
+     * 邮箱
+     */
+    private String mail;
+
+    /**
      * 生日
      */
     private String birthday;

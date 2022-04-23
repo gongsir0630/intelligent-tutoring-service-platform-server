@@ -20,7 +20,7 @@ public enum IntelligentTutoringSubjectEnum {
     /**
      * 数学
      */
-    MATH("math", "数据"),
+    MATH("math", "数学"),
     /**
      * 英语
      */

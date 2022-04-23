@@ -65,6 +65,11 @@ public class IntelligentTutoringUser {
     private String phone;
 
     /**
+     * 邮箱
+     */
+    private String mail;
+
+    /**
      * 生日
      */
     private Long birthday;
