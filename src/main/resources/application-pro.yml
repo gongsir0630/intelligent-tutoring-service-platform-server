@@ -6,3 +6,6 @@ spring:
     url: jdbc:mysql://localhost:3306/intelligent-tutoring-service-platform-server?serverTimezone=UTC
     username: root
     password: admin1234
+# 启动端口
+server:
+  port: 8080
