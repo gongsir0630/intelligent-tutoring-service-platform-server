@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * @author 何双宝 <2936741978@qq.com>
  * Created on 2022-04-10
@@ -45,4 +47,9 @@ public class IntelligentTutoringCourseVO {
      */
     private String courseState;
     private String courseStateDesc;
+
+    /**
+     * 所有聊天记录
+     */
+    private List<IntelligentTutoringMessageVO> messageList;
 }

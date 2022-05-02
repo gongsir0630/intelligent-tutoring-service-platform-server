@@ -3,7 +3,6 @@ package com.intelligent.platform.server.controller;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.ImmutableMap;
 import com.intelligent.platform.server.annotation.SysUserName;
-import com.intelligent.platform.server.enums.IntelligentTutoringCourseStateEnum;
 import com.intelligent.platform.server.model.IntelligentTutoringCourse;
 import com.intelligent.platform.server.param.IntelligentTutoringCourseBookParam;
 import com.intelligent.platform.server.param.IntelligentTutoringCourseUpdateParam;
@@ -39,13 +38,10 @@ public class IntelligentTutoringCourseController {
     public Map<String, Object> book(@RequestBody IntelligentTutoringCourseBookParam param,
                                     @SysUserName String username) {
         logger.info("学生提交预约信息, param===>{}, username===>{}", JSON.toJSONString(param), username);
-        IntelligentTutoringCourse course = IntelligentTutoringCourse.builder()
-                .studentUsername(username)
-                .teacherUsername(param.getTeacherUsername())
-                .initialScore(param.getScore())
-                .courseState(IntelligentTutoringCourseStateEnum.BOOKING.getCode())
-                .build();
-        intelligentTutoringCourseService.book(course);
+        param.checkParam();
+        param.setUsername(username);
+        intelligentTutoringCourseService.book(param);
+
         return ImmutableMap.of(
                 "code", 20000,
                 "data", "success"
@@ -70,9 +66,7 @@ public class IntelligentTutoringCourseController {
                     "data", "id不正确"
             );
         }
-        course.setCourseAllowance(param.getCourseAllowance());
-        course.setCourseState(param.getCourseState());
-        intelligentTutoringCourseService.updateById(course);
+        intelligentTutoringCourseService.updateAndSendMessage(param);
         return ImmutableMap.of(
                 "code", 20000,
                 "data", intelligentTutoringCourseService.queryCourseListByUsername(username)

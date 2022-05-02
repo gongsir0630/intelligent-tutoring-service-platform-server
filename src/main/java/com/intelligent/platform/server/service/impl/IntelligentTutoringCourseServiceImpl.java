@@ -7,7 +7,11 @@ import com.intelligent.platform.server.dao.IntelligentTutoringCourseDAO;
 import com.intelligent.platform.server.enums.IntelligentTutoringCourseStateEnum;
 import com.intelligent.platform.server.enums.IntelligentTutoringUserRoleEnum;
 import com.intelligent.platform.server.model.IntelligentTutoringCourse;
+import com.intelligent.platform.server.model.IntelligentTutoringMessage;
+import com.intelligent.platform.server.param.IntelligentTutoringCourseBookParam;
+import com.intelligent.platform.server.param.IntelligentTutoringCourseUpdateParam;
 import com.intelligent.platform.server.service.IntelligentTutoringCourseService;
+import com.intelligent.platform.server.service.IntelligentTutoringMessageService;
 import com.intelligent.platform.server.service.IntelligentTutoringUserService;
 import com.intelligent.platform.server.utils.IntelligentTutoringMailUtils;
 import com.intelligent.platform.server.vo.IntelligentTutoringCourseVO;
@@ -18,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -33,15 +38,31 @@ public class IntelligentTutoringCourseServiceImpl extends ServiceImpl<Intelligen
         implements IntelligentTutoringCourseService {
 
     private final IntelligentTutoringUserService userService;
+    private final IntelligentTutoringMessageService messageService;
 
-    public IntelligentTutoringCourseServiceImpl(IntelligentTutoringUserService userService) {
+    public IntelligentTutoringCourseServiceImpl(IntelligentTutoringUserService userService,
+                                                IntelligentTutoringMessageService messageService) {
         this.userService = userService;
+        this.messageService = messageService;
     }
 
     @Override
-    public void book(IntelligentTutoringCourse course) {
+    public void book(IntelligentTutoringCourseBookParam param) {
+        String username = param.getUsername();
+        // 先记录课程预约信息
+        IntelligentTutoringCourse course = IntelligentTutoringCourse.builder()
+                .studentUsername(username)
+                .teacherUsername(param.getTeacherUsername())
+                .initialScore(param.getScore())
+                .courseState(IntelligentTutoringCourseStateEnum.BOOKING.getCode())
+                .build();
         save(course);
-        // TODO: 2022/4/23 新增留言信息, 通知老师学生预约了他的课程信息
+        // 生成的课程id
+        Long courseId = course.getId();
+
+        // 消息绑定到课程上
+        saveMessage(param, courseId);
+
         // 邮件通知
         CompletableFuture.runAsync(() -> {
             IntelligentTutoringUserVO teacher = userService.queryByUsername(course.getTeacherUsername());
@@ -57,6 +78,18 @@ public class IntelligentTutoringCourseServiceImpl extends ServiceImpl<Intelligen
                     .build();
             IntelligentTutoringMailUtils.send(content);
         });
+    }
+
+    private void saveMessage(IntelligentTutoringCourseBookParam param, Long courseId) {
+        // 后台留言给老师
+        IntelligentTutoringMessage message = new IntelligentTutoringMessage();
+        message.setFromUser(param.getUsername());
+        message.setToUser(param.getTeacherUsername());
+        message.setContent(param.getMessage());
+        message.setToSeeState(Boolean.FALSE);
+        message.setCreateTime(System.currentTimeMillis());
+        message.setCourseId(courseId);
+        messageService.save(message);
     }
 
     @Override
@@ -81,7 +114,31 @@ public class IntelligentTutoringCourseServiceImpl extends ServiceImpl<Intelligen
             default:
                 break;
         }
-        return ListUtils.emptyIfNull(courseList).parallelStream().map(this::buildVO).collect(Collectors.toList());
+        return ListUtils.emptyIfNull(courseList).parallelStream().map(this::buildVO)
+                .sorted(Comparator.comparing(IntelligentTutoringCourseVO::getId).reversed())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void updateAndSendMessage(IntelligentTutoringCourseUpdateParam param) {
+        // 更新课程信息 & 发送邮件通知
+        IntelligentTutoringCourse course = getById(param.getId());
+        course.setCourseAllowance(param.getCourseAllowance());
+        course.setCourseState(param.getCourseState());
+        updateById(course);
+
+        // 给学生发消息
+        if (StringUtils.isNotBlank(param.getMessage())) {
+            IntelligentTutoringMessage message = new IntelligentTutoringMessage();
+            message.setFromUser(course.getTeacherUsername());
+            message.setToUser(course.getStudentUsername());
+            message.setContent(param.getMessage());
+            message.setToSeeState(Boolean.FALSE);
+            message.setCreateTime(System.currentTimeMillis());
+            message.setCourseId(course.getId());
+            messageService.save(message);
+        }
+
     }
 
     private IntelligentTutoringCourseVO buildVO(IntelligentTutoringCourse course) {
@@ -93,6 +150,7 @@ public class IntelligentTutoringCourseServiceImpl extends ServiceImpl<Intelligen
                 .courseAllowance(course.getCourseAllowance())
                 .courseState(course.getCourseState())
                 .courseStateDesc(IntelligentTutoringCourseStateEnum.code2Desc(course.getCourseState()))
+                .messageList(messageService.queryAllMessageByCourseId(course.getId()))
                 .build();
     }
 

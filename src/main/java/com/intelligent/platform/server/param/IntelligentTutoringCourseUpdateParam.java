@@ -20,4 +20,9 @@ public class IntelligentTutoringCourseUpdateParam {
      * 状态
      */
     private String courseState;
+
+    /**
+     * 回复消息
+     */
+    private String message;
 }
