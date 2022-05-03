@@ -141,6 +141,17 @@ public class IntelligentTutoringCourseServiceImpl extends ServiceImpl<Intelligen
 
     }
 
+    /**
+     * 根据 id 查询课程详情
+     *
+     * @param courseId 课程id
+     * @return 课程详情
+     */
+    @Override
+    public IntelligentTutoringCourseVO queryById(Long courseId) {
+        return buildVO(getById(courseId));
+    }
+
     private IntelligentTutoringCourseVO buildVO(IntelligentTutoringCourse course) {
         return IntelligentTutoringCourseVO.builder()
                 .id(course.getId())

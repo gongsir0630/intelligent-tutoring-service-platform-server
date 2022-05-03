@@ -10,6 +10,7 @@ import com.intelligent.platform.server.vo.IntelligentTutoringAnnouncementVO;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -36,7 +37,9 @@ public class IntelligentTutoringAnnouncementServiceImpl extends ServiceImpl<Inte
     @Override
     public List<IntelligentTutoringAnnouncementVO> listAll() {
         List<IntelligentTutoringAnnouncement> list = list();
-        return ListUtils.emptyIfNull(list).stream().map(this::buildVO).collect(Collectors.toList());
+        return ListUtils.emptyIfNull(list).stream().map(this::buildVO)
+                .sorted(Comparator.comparing(IntelligentTutoringAnnouncementVO::getDate).reversed())
+                .collect(Collectors.toList());
     }
 
     private IntelligentTutoringAnnouncementVO buildVO(IntelligentTutoringAnnouncement announcement) {

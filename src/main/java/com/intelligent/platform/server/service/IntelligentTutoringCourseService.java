@@ -33,4 +33,11 @@ public interface IntelligentTutoringCourseService extends IService<IntelligentTu
      * @param param 课程状态 & 消息信息
      */
     void updateAndSendMessage(IntelligentTutoringCourseUpdateParam param);
+
+    /**
+     * 根据 id 查询课程详情
+     * @param courseId 课程id
+     * @return 课程详情
+     */
+    IntelligentTutoringCourseVO queryById(Long courseId);
 }
