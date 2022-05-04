@@ -17,4 +17,11 @@ public interface IntelligentTutoringAchievementService extends IService<Intellig
      * @return 当前老师的所有教学成果
      */
     List<IntelligentTutoringAchievement> listAll(String teacherUsername);
+
+    /**
+     * 根据课程id查询
+     * @param courseId 课程id
+     * @return 教学成果
+     */
+    IntelligentTutoringAchievement queryByCourseId(long courseId);
 }

@@ -7,6 +7,7 @@ import com.intelligent.platform.server.service.IntelligentTutoringAchievementSer
 import com.intelligent.platform.server.service.IntelligentTutoringCourseService;
 import com.intelligent.platform.server.service.IntelligentTutoringUserService;
 import com.intelligent.platform.server.vo.IntelligentTutoringCourseVO;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +45,22 @@ public class IntelligentTutoringAchievementServiceImpl extends ServiceImpl<Intel
                 courseIdList).orderByDesc(IntelligentTutoringAchievement::getId).list());
         achievements.forEach(this::generateVoFields);
         return achievements;
+    }
+
+    /**
+     * 根据课程id查询
+     *
+     * @param courseId 课程id
+     * @return 教学成果
+     */
+    @Override
+    public IntelligentTutoringAchievement queryByCourseId(long courseId) {
+        List<IntelligentTutoringAchievement> achievements =
+                lambdaQuery().eq(IntelligentTutoringAchievement::getCourseId, courseId).list();
+        if (CollectionUtils.isEmpty(achievements)) {
+            return null;
+        }
+        return achievements.get(0);
     }
 
     private void generateVoFields(IntelligentTutoringAchievement achievement) {

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author 何双宝 <2936741978@qq.com>
@@ -47,6 +48,13 @@ public class IntelligentTutoringAchievementController {
     public Map<String, Object> saveOrUpdate(@RequestBody IntelligentTutoringAchievement param,
                                             @SysUserName String username) {
         logger.info("saveOrUpdate, param===>{}, username===>{}", JSON.toJSONString(param), username);
+        IntelligentTutoringAchievement exist = intelligentTutoringAchievementService.queryByCourseId(param.getCourseId());
+        if (Objects.nonNull(exist)) {
+            return ImmutableMap.of(
+                    "code", 20001,
+                    "message", "成果已存在, 请勿重复添加!"
+            );
+        }
         intelligentTutoringAchievementService.saveOrUpdate(param);
         return ImmutableMap.of(
                 "code", 20000,
