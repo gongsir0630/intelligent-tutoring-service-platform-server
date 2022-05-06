@@ -107,11 +107,14 @@ public class IntelligentTutoringUserController {
         logger.info("register, 用户提交注册信息, param===>{}", JSON.toJSONString(param));
 
         IntelligentTutoringUser tutoringUser = intelligentTutoringUserService.getById(param.getUsername());
-        if (Objects.isNull(tutoringUser)) {
-            boolean save = intelligentTutoringUserService.save(param.buildUser());
-            tutoringUser = intelligentTutoringUserService.getById(param.getUsername());
-            logger.info("注册用户信息, save===>{}", save);
+        if (Objects.nonNull(tutoringUser)) {
+            return ImmutableMap.of(
+                    "code", 20001,
+                    "message", "账号已被注册, 试试别的账号吧~");
         }
+        boolean save = intelligentTutoringUserService.save(param.buildUser());
+        tutoringUser = intelligentTutoringUserService.getById(param.getUsername());
+        logger.info("注册用户信息, save===>{}", save);
         return ImmutableMap.of(
                 "code", 20000,
                 "data", ImmutableMap.of("token", tutoringUser.getUsername())

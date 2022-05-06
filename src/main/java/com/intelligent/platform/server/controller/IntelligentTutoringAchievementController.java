@@ -50,10 +50,8 @@ public class IntelligentTutoringAchievementController {
         logger.info("saveOrUpdate, param===>{}, username===>{}", JSON.toJSONString(param), username);
         IntelligentTutoringAchievement exist = intelligentTutoringAchievementService.queryByCourseId(param.getCourseId());
         if (Objects.nonNull(exist)) {
-            return ImmutableMap.of(
-                    "code", 20001,
-                    "message", "成果已存在, 请勿重复添加!"
-            );
+            // 已存在, 直接更新
+            param.setId(exist.getId());
         }
         intelligentTutoringAchievementService.saveOrUpdate(param);
         return ImmutableMap.of(
