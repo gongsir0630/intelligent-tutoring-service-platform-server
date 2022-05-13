@@ -20,6 +20,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
+ * 真正实现对用户信息进行管理, 是对 {@link IntelligentTutoringUserService} 所有接口的真正实现
+ *
  * @author 何双宝 <2936741978@qq.com>
  * Created on 2022-04-03
  */

@@ -27,6 +27,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
+ *
+ *
  * @author 何双宝 <2936741978@qq.com>
  * Created on 2022-04-03
  */
@@ -34,8 +36,14 @@ import java.util.stream.Collectors;
 @RequestMapping("/vue-admin-template/user")
 public class IntelligentTutoringUserController {
 
+    /**
+     * 专属于当前类的日志记录器
+     */
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    /**
+     * 用户信息管理业务逻辑接口
+     */
     private final IntelligentTutoringUserService intelligentTutoringUserService;
 
     @Autowired
@@ -43,14 +51,23 @@ public class IntelligentTutoringUserController {
         this.intelligentTutoringUserService = intelligentTutoringUserService;
     }
 
+    /**
+     * 用户登录
+     * @param user 接口用户登录参数(主要是账号和密码)
+     * @return 登录成功, 返回用户token(通行证)
+     */
     @PostMapping("/login")
     public Map<Object, Object> login(@RequestBody IntelligentTutoringUser user) {
 
+        // 后端在控制台或者日志文件中打印一下前端提交的参数
         logger.info("login, username===>{}, password===>{}", user.getUsername(), user.getPassword());
 
-        // 从数据库查询用户信息
+        // 检查前端提交的登录参数: 账号和密码是否输入正确
+
+        // 1. 从数据库查询用户信息
         IntelligentTutoringUser tutoringUser = intelligentTutoringUserService.getById(user.getUsername());
 
+        // 用户不存在, 直接告诉前端, 登录失败, 原因是用户账号不存在
         if (Objects.isNull(tutoringUser)) {
             logger.info("login, 未查询到用户信息, username===>{}", user.getUsername());
             return ImmutableMap.of(
@@ -59,6 +76,7 @@ public class IntelligentTutoringUserController {
             );
         }
 
+        // 用户存在, 比较输入的密码和用户注册保存的密码是否一致
         if (!StringUtils.equals(user.getPassword(), tutoringUser.getPassword())) {
             logger.info("login, 用户登录失败_密码错误, 用户输入的密码===>{}, 数据库密码===>{}",
                     user.getPassword(), tutoringUser.getPassword());
@@ -70,12 +88,18 @@ public class IntelligentTutoringUserController {
 
         logger.info("login, 用户登录成功, 用户信息===>{}", JSON.toJSONString(tutoringUser));
 
+        // 登录成功, 发放通行证
         return ImmutableMap.of(
                 "code", 20000,
                 "data", ImmutableMap.of("token", tutoringUser.getUsername())
         );
     }
 
+    /**
+     * 查询用户信息
+     * @param token 用户名(通行证)
+     * @return 用户详细信息
+     */
     @GetMapping("/info")
     public Map<String, Object> getUserInfo(String token) {
         logger.info("getUserInfo, token===>{}", token);
@@ -94,6 +118,10 @@ public class IntelligentTutoringUserController {
         );
     }
 
+    /**
+     * 退出登录
+     * @return 成功
+     */
     @PostMapping("/logout")
     public Map<String, Object> logout() {
         return ImmutableMap.of(
@@ -102,6 +130,11 @@ public class IntelligentTutoringUserController {
         );
     }
 
+    /**
+     * 用户注册
+     * @param param 用户注册信息
+     * @return 注册成功直接返回用户token(前端自动登录)
+     */
     @PostMapping("/register")
     public Map<String, Object> register(@RequestBody IntelligentTutoringUserParam param) {
         logger.info("register, 用户提交注册信息, param===>{}", JSON.toJSONString(param));
@@ -132,6 +165,11 @@ public class IntelligentTutoringUserController {
         );
     }
 
+
+    /**
+     * 获取所有年级
+     * @return 返回所有年级
+     */
     @GetMapping("/grade")
     public Map<String, Object> getGradeList() {
         // 流式处理
