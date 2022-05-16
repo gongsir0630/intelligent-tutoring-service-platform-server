@@ -72,4 +72,15 @@ public class IntelligentTutoringCourseController {
                 "data", intelligentTutoringCourseService.queryCourseListByUsername(username)
         );
     }
+
+    @PostMapping("/delete")
+    public Map<String, Object> delete(@RequestBody IntelligentTutoringCourse param,
+                                      @SysUserName String username) {
+        logger.info("delete, param===>{}, username===>{}", JSON.toJSONString(param), username);
+        intelligentTutoringCourseService.removeById(param.getId());
+        return ImmutableMap.of(
+                "code", 20000,
+                "data", "success"
+        );
+    }
 }

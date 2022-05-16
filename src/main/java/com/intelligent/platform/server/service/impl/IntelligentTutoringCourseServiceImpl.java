@@ -21,6 +21,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -185,5 +186,13 @@ public class IntelligentTutoringCourseServiceImpl extends ServiceImpl<Intelligen
             log.info("邮箱发送成功, send to===>{}", student.getMail());
         });
         return update;
+    }
+
+    @Override
+    public boolean removeById(Serializable id) {
+        // 删除课程相关的所有消息
+        messageService.remove(messageService.lambdaQuery()
+                .eq(IntelligentTutoringMessage::getCourseId, id).getWrapper());
+        return super.removeById(id);
     }
 }
